@@ -3,11 +3,16 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
     //private Transform player;
-    public enum Direction { NORTH, SOUTH, EAST, WEST, STOP};
+    public enum Direction { NORTH, SOUTH, EAST, WEST};
+    public Direction North = Direction.NORTH;
+    public Direction East = Direction.EAST;
+    public Direction South = Direction.SOUTH;
+    public Direction West = Direction.WEST;
+    public Transform child;
     public float delayTime = 0.5f;
     public Direction lastDirection = Direction.NORTH;
-    //private Vector3 pos;
-    // private int count = 0;
+    private Vector3 pos;
+    //private int countFollowHeads = 0;
 
     private void Start()
     {
@@ -18,23 +23,52 @@ public class PlayerMovement : MonoBehaviour {
         Direction direction;
         if (Input.GetKey("w"))
         {
-            direction = Direction.NORTH;
-            lastDirection = Direction.NORTH;
+            if(lastDirection != Direction.SOUTH)
+            {
+                direction = Direction.NORTH;
+                lastDirection = Direction.NORTH;
+            }
+            else
+            {
+                direction = lastDirection;
+            }
         }
         else if (Input.GetKey("a"))
         {
-            direction = Direction.WEST;
-            lastDirection = Direction.WEST;
+            if(lastDirection != Direction.EAST)
+            {
+                direction = Direction.WEST;
+                lastDirection = Direction.WEST;
+            }
+            else
+            {
+                direction = lastDirection;
+            }
+
         }
         else if (Input.GetKey("s"))
         {
-            direction = Direction.SOUTH;
-            lastDirection = Direction.SOUTH;
+            if(lastDirection != Direction.NORTH)
+            {
+                direction = Direction.SOUTH;
+                lastDirection = Direction.SOUTH;
+            }
+            else
+            {
+                direction = lastDirection;
+            }
         }
         else if (Input.GetKey("d"))
         {
-            direction = Direction.EAST;
-            lastDirection = Direction.EAST;
+            if(lastDirection != Direction.WEST)
+            {
+                direction = Direction.EAST;
+                lastDirection = Direction.EAST;
+            }
+            else
+            {
+                direction = lastDirection;
+            }
         }
         else
         {
@@ -49,46 +83,79 @@ public class PlayerMovement : MonoBehaviour {
     {
         if(direction == Direction.NORTH)
         {
-            transform.Translate(0.0f, 1.0f, 0.0f);
-            //pos = transform.position;
+            pos = transform.position;
+            transform.Translate(0.0f, 0.0f, 1.0f);
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                transform.GetChild(i).Translate(0.0f, 0.0f, -1.0f);
+                Vector3 temp = transform.GetChild(i).position;
+                transform.GetChild(i).position = pos;
+                pos = temp;
+            }
         }
         else if (direction == Direction.SOUTH)
         {
-            transform.Translate(0.0f, -1.0f, 0.0f);
-            //pos = transform.position;
+            pos = transform.position;
+            transform.Translate(0.0f, 0.0f, -1.0f);
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                transform.GetChild(i).Translate(0.0f, 0.0f, 1.0f);
+                Vector3 temp = transform.GetChild(i).position;
+                transform.GetChild(i).position = pos;
+                pos = temp;
+            }
         }
         else if (direction == Direction.WEST)
         {
+            pos = transform.position;
             transform.Translate(-1.0f, 0.0f, 0.0f);
-            //pos = transform.position;
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                transform.GetChild(i).Translate(1.0f, 0.0f, 0.0f);
+                Vector3 temp = transform.GetChild(i).position;
+                transform.GetChild(i).position = pos;
+                pos = temp;
+            }
         }
         else if (direction == Direction.EAST)
         {
+            pos = transform.position;
             transform.Translate(1.0f, 0.0f, 0.0f);
-            //pos = transform.position;
-        }
-        else if(direction == Direction.STOP)
-        {
-            //transform.Translate(0.0f, 0.0f, 0.0f);
-            //transform.position = pos;
-            Destroy(gameObject);
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                transform.GetChild(i).Translate(-1.0f, 0.0f, 0.0f);
+                Vector3 temp = transform.GetChild(i).position;
+                transform.GetChild(i).position = pos;
+                pos = temp;
+            }
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.tag == "Wall")
+        if(collision.gameObject.tag != "Ground")
         {
-            Debug.Log("The snake head hit a wall");
-            lastDirection = Direction.STOP; 
+            //Debug.Log("Some collision has taken place");
+            if (collision.gameObject.tag == "Wall")
+            {
+                Debug.Log("The snake head hit a wall");
+                //lastDirection = Direction.STOP; 
+                Destroy(gameObject);
+            }
+            else if (collision.gameObject.tag == "body")
+            {
+                Debug.Log("the snake hit itself");
+                Destroy(gameObject);
+            }
         }
 
     }
 
-    private void Update()
-    {
-        Debug.Log("the pos of the snake head is" + transform.position);
-    }
+    //public void childCollision()
+    //{
+    //    Debug.Log("Child Col");
+    //    Destroy(gameObject);
+    //}
 
 
 
